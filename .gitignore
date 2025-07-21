@@ -1,0 +1,13 @@
+# 忽略 Python 编译缓存
+**/__pycache__/
+*.py[cod]
+
+# 忽略日志和输出结果
+整理结果/
+资源整理日志.txt
+
+# 忽略 IDE 和系统相关
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

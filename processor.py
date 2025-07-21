@@ -20,6 +20,9 @@ def process_resources(source, output, selected_types, update_progress_callback):
         log_file.write("=" * 50 + "\n\n")
 
     config_files = find_config_json(source)
+
+    print(config_files)
+
     if not config_files:
         messagebox.showerror("错误", "未找到任何配置文件")
         return
