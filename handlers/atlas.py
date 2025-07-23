@@ -48,7 +48,7 @@ def handle(proc, config, res_id, save_path):
         if(imageField is None):
             return False,f'atlas 处理失败,匹配到的图不存在 {save_path} | id：{imageResId}'
         imageSaveName = proc.paths.get(f'{imageResId}')[0].split('/')[-1]
-        imageNewName = imageSaveName + save_image(imageField,save_path,imageSaveName).split('.')[-1]
+        imageNewName = f'{imageSaveName}.{save_image(imageField,save_path,imageSaveName).split('.')[-1]}'
 
         atlasSaveName = save_path.split('/')[-1]
         wh = get_image_size(imageField)
