@@ -5,8 +5,6 @@ def handle(proc, config, res_id, save_path):
 
     try:
         proc.logInfo += f'\n》atlas处理:'
-        if res_id == 523:
-            proc.logInfo += f'\n》atlas处理:523'
         packName = ""
         packIds = []
         for key, values in proc.packs.items():
