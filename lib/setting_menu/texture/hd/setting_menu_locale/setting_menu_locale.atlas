@@ -1,0 +1,40 @@
+png
+size: 448,110
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+ic_hist
+  rotate: False
+  xy: 1, 1
+  size: 108,108
+  orig: 108,108
+  offset: 0,0
+  index: -1
+ic_win
+  rotate: False
+  xy: 387, 1
+  size: 60,60
+  orig: 60,60
+  offset: 0,0
+  index: -1
+txt_auto
+  rotate: False
+  xy: 111, 1
+  size: 90,90
+  orig: 90,90
+  offset: 0,0
+  index: -1
+txt_turbo_off
+  rotate: False
+  xy: 203, 1
+  size: 90,90
+  orig: 90,90
+  offset: 0,0
+  index: -1
+txt_turbo_on
+  rotate: False
+  xy: 295, 1
+  size: 90,90
+  orig: 90,90
+  offset: 0,0
+  index: -1

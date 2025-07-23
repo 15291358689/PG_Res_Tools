@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 import threading
 from config import RESOURCE_TYPES
-from processor import process_resources
+from processor import Processor
 
 class ToolApp:
     def __init__(self):
@@ -65,9 +65,10 @@ class ToolApp:
 
     def run(self):
         selected = [rtype for rtype, var in self.type_vars.items() if var.get()]
-        process_resources(
+        proc = Processor(
             self.source_path.get(),
             self.output_path.get(),
             selected,
             self.update_progress
-        )
+            )
+        proc.process_resources()

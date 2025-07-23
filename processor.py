@@ -7,78 +7,99 @@ from config import TYPE_CATEGORIES
 from utils import find_config_json
 from handlers import get_handler_for_type
 
-def process_resources(source, output, selected_types, update_progress_callback):
-    os.makedirs(output, exist_ok=True)
-    log_path = os.path.join(output, "资源整理日志.txt")
+class Processor:
+    def __init__(self,source, output, selected_types, update_progress_callback):
+        self.source = source
+        self.output = output
+        self.selected_types = selected_types
+        self.update_progress_callback = update_progress_callback
+        self.log_path = ""
+        self.paths = {}
+        self.types = []
+        self.uuids = []
+        self.packs = {}
+        self.versions = {}
+        self.logInfo = ""
 
-    with open(log_path, "w", encoding="utf-8") as log_file:
-        log_file.write("Cocos资源整理日志\n")
-        log_file.write(f"源文件夹: {source}\n")
-        log_file.write(f"输出文件夹: {output}\n")
-        log_file.write(f"处理的资源类型: {', '.join(selected_types)}\n")
-        log_file.write(f"开始时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
-        log_file.write("=" * 50 + "\n\n")
+    def process_resources(self):
+        if not self.source : 
+            messagebox.showerror("错误", "资源文件夹目录为空")
+            return
+        os.makedirs(self.output, exist_ok=True)
+        self.log_path = os.path.join(self.output, "资源整理日志.txt")
 
-    config_files = find_config_json(source)
 
-    print(config_files)
+        self.logInfo = f"Cocos资源整理日志\n源文件夹: {self.source}\n输出文件夹: {self.output}\n处理的资源类型: {', '.join(self.selected_types)}\n开始时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n" + "=" * 50 + "\n\n"
+        # with open(self.log_path, "w", encoding="utf-8") as log_file:
+        #     log_file.write(logInfo)
+            # log_file.write("Cocos资源整理日志\n")
+            # log_file.write(f"源文件夹: {self.source}\n")
+            # log_file.write(f"输出文件夹: {self.output}\n")
+            # log_file.write(f"处理的资源类型: {', '.join(self.selected_types)}\n")
+            # log_file.write(f"开始时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+            # log_file.write("=" * 50 + "\n\n")
 
-    if not config_files:
-        messagebox.showerror("错误", "未找到任何配置文件")
-        return
+        config_files = find_config_json(self.source,self.selected_types)
 
-    total_resources = 0
-    success_count = 0
-    error_count = 0
+        print("已找到配置文件：",config_files)
 
-    for config_path in config_files:
-        try:
-            with open(config_path, "r", encoding="utf-8") as f:
-                config = json.load(f)
+        if not config_files:
+            messagebox.showerror("错误", "未找到任何配置文件")
+            return
 
-            paths = config.get("paths", {})
-            types = config.get("types", [])
-            uuids = config.get("uuids", [])
+        total_resources = 0
+        success_count = 0
+        error_count = 0
 
-            for category in set(TYPE_CATEGORIES.values()):
-                os.makedirs(os.path.join(output, category), exist_ok=True)
+        for config_path in config_files:
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    config = json.load(f)
 
-            for idx, (res_id, res_info) in enumerate(paths.items(), 1):
-                try:
-                    original_path = res_info[0]
-                    type_idx = res_info[1]
-                    uuid = uuids[int(res_id)]
-                    res_type = types[type_idx] if type_idx < len(types) else "unknown"
+                self.paths = config.get("paths", {})
+                self.types = config.get("types", [])
+                self.uuids = config.get("uuids", [])
+                self.packs = config.get("packs", {})
+                self.versions = config.get("versions", {})
 
-                    if res_type not in selected_types:
-                        continue
+                self.logInfo += (f"》》》》》》》》》》》》开始处理: {config_path} : \n")
 
-                    category = TYPE_CATEGORIES.get(res_type, "unknown")
-                    import_path = os.path.join(source, "import", uuid)
-                    assets_path = os.path.join(source, "assets", original_path)
+                for idx, (res_id, res_info) in enumerate(self.paths.items(), 1):
+                    try:
+                        save_path = f'{self.output}/{res_info[0]}'
+                        type_idx = res_info[1]
+                        # uuid = self.uuids[int(res_id)]
+                        res_type = self.types[type_idx]
 
-                    source_file = import_path if os.path.exists(import_path) else assets_path
-                    if not os.path.exists(source_file):
-                        continue
+                        if res_type not in self.selected_types:
+                            continue
 
-                    _, ext = os.path.splitext(original_path)
-                    if not ext:
-                        _, ext = os.path.splitext(source_file)
-                    dest_file = os.path.join(output, category, f"{uuid}{ext}")
+                        self.logInfo += f"\n>>>>开始处理：{res_id}"
 
-                    handler = get_handler_for_type(res_type)
-                    handler(source_file, dest_file, res_info, log_path)
+                        handler = get_handler_for_type(res_type)
+                        back,msg = handler(self,config, int(res_id), save_path)
 
-                    success_count += 1
-                    total_resources += 1
+                        if(back) : 
+                            success_count += 1 
+                            self.logInfo += (f"\n   成功处理: {res_info[0]} : {res_id}\n")
+                        else: 
+                            error_count += 1
+                            self.logInfo += (f"\n   ***处理失败***: {res_info[0]} : {res_id}\n     {msg}\n")
+                            
 
-                except Exception:
-                    error_count += 1
+                        total_resources += 1
+                    except Exception:
+                        error_count += 1
 
-                update_progress_callback(idx, len(paths), success_count, error_count)
+                    self.update_progress_callback(idx, len(self.paths), success_count, error_count)
+            except Exception as e:
+                self.logInfo += (f"配置文件 {config_path} 处理失败: {str(e)}\n")
+                    
+        with open(self.log_path, "w", encoding="utf-8") as log_file:
+            log_file.write(self.logInfo)
 
-        except Exception as e:
-            with open(log_path, "a", encoding="utf-8") as log_file:
-                log_file.write(f"配置文件 {config_path} 处理失败: {str(e)}\n")
+        messagebox.showinfo("完成", f"成功: {success_count}, 失败: {error_count}, 总数: {total_resources}")
 
-    messagebox.showinfo("完成", f"成功: {success_count}, 失败: {error_count}, 总数: {total_resources}")
+        # 点击"确定"后打开文件夹
+        os.startfile(self.output)  # 仅限Windows
+        
