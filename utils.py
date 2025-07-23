@@ -30,7 +30,7 @@ def find_config_json(source, selected_types):
     return config_files
 
 def find_field_json(source, name):
-    pattern = re.compile(rf'^{re.escape(name)}\..+\.json$', re.IGNORECASE)
+    pattern = re.compile(rf'.*{re.escape(name)}.*\.json$', re.IGNORECASE)
 
     for root, _, files in os.walk(source):
         for file in files:
@@ -59,7 +59,7 @@ def find_field_path(source, name):
 
     return
 
-def save_field(src_path, dst_dir, new_name):
+def copy_field(src_path, dst_dir, new_name):
     """
     复制文件到新路径并重命名（保留后缀），自动创建目录，覆盖同名文件
     
@@ -134,23 +134,23 @@ def convert_atlas_array(atlas_json_list, img_name, atlas_size,
     # 返回连接后的完整图集文件
     return "\n".join(atlas_str)
 
-def save_atlas_file(atlas_content, folder_path, filename="test"):
+def save_file(content, folder_path, filename):
     """
-    将图集内容保存为.atlas文件
+    将内容保存为文件
     
     :param atlas_content: 从convert_atlas_array返回的字符串
     :param folder_path: 目标文件夹路径
-    :param filename: 文件名（不含后缀）
+    :param filename: 文件名（含后缀）
     """
     # 确保文件夹存在，不存在则创建
     os.makedirs(folder_path, exist_ok=True)
     
     # 拼接完整文件路径
-    file_path = os.path.join(folder_path, f"{filename}.atlas")
+    file_path = os.path.join(folder_path, filename)
     
     # 写入文件
     with open(file_path, 'w', encoding='utf-8') as f:
-        f.write(atlas_content)
+        f.write(content)
     
-    print(f"图集文件已保存至: {file_path}")
+    print(f"文件已保存至: {file_path}")
     return file_path

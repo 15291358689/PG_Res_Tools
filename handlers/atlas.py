@@ -46,14 +46,14 @@ def handle(proc, config, res_id, save_path):
         if(imageField is None):
             return False,f'atlas 处理失败,匹配到的图不存在 {save_path} | id：{imageResId}'
         imageSaveName = proc.paths.get(f'{imageResId}')[0].split('/')[-1]
-        imageNewName = f'{imageSaveName}.{save_field(imageField,save_path,imageSaveName).split('.')[-1]}'
+        imageNewName = f'{imageSaveName}.{copy_field(imageField,save_path,imageSaveName).split('.')[-1]}'
 
         atlasSaveName = save_path.split('/')[-1]
         wh = get_image_size(imageField)
         # 把atlasSonS 中 fieldAtlasSonIdxS序号的文件转为 atlas
         atlasDataS = [packField[5][i][0][0] for i in fieldAtlasSonIdxS]
         atlasDataStr = convert_atlas_array(atlasDataS,imageNewName,wh)
-        save_atlas_file(atlasDataStr,save_path,atlasSaveName)
+        save_file(atlasDataStr,save_path,atlasSaveName + ".atlas")
 
         return True, "atlas 资源处理成功"
     

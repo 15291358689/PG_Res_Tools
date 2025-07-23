@@ -18,7 +18,7 @@ def handle(proc, config, res_id, save_path):
             return False,f'音频 处理失败,匹配到的资源不存在 {audioField} | id：{res_id}'
         
         audioSaveName = proc.paths.get(f'{res_id}')[0].split('/')[-1]
-        audioNewName = f'{audioSaveName}.{save_field(audioField,save_path,audioSaveName).split('.')[-1]}'
+        audioNewName = f'{audioSaveName}.{copy_field(audioField,save_path,audioSaveName).split('.')[-1]}'
 
         return True, "音频 资源处理成功"
     

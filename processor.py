@@ -30,14 +30,6 @@ class Processor:
 
 
         self.logInfo = f"Cocos资源整理日志\n源文件夹: {self.source}\n输出文件夹: {self.output}\n处理的资源类型: {', '.join(self.selected_types)}\n开始时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n" + "=" * 50 + "\n\n"
-        # with open(self.log_path, "w", encoding="utf-8") as log_file:
-        #     log_file.write(logInfo)
-            # log_file.write("Cocos资源整理日志\n")
-            # log_file.write(f"源文件夹: {self.source}\n")
-            # log_file.write(f"输出文件夹: {self.output}\n")
-            # log_file.write(f"处理的资源类型: {', '.join(self.selected_types)}\n")
-            # log_file.write(f"开始时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
-            # log_file.write("=" * 50 + "\n\n")
 
         config_files = find_config_json(self.source,self.selected_types)
 
