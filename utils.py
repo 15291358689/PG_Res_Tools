@@ -49,21 +49,21 @@ def find_field_json(source, name):
 
     return None  # 如果没有找到任何匹配项，返回 None
 
-def find_field_image(source, name):
-    image_pattern = re.compile(rf'^.+\.{re.escape(name)}\.(png|jpg|jpeg|webp)$', re.IGNORECASE)
+def find_field_path(source, name):
+    field_pattern = re.compile(rf'^.+\.{re.escape(name)}\..*?$', re.IGNORECASE)
 
     for root, _, files in os.walk(source):
         for file in files:
-            if image_pattern.match(file):
+            if field_pattern.match(file):
                 return os.path.join(root, file)
 
     return
 
-def save_image(src_path, dst_dir, new_name):
+def save_field(src_path, dst_dir, new_name):
     """
-    复制图片到新路径并重命名（保留后缀），自动创建目录，覆盖同名文件
+    复制文件到新路径并重命名（保留后缀），自动创建目录，覆盖同名文件
     
-    :param src_path: 原图片路径（如 "/data/old_image.jpg"）
+    :param src_path: 原路径（如 "/data/old_image.jpg"）
     :param dst_dir: 目标文件夹（如 "/backup"）
     :param new_name: 新文件名（不带后缀，如 "new_image"）
     :return: 新文件的完整路径
