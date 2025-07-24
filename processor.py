@@ -4,14 +4,13 @@ import shutil
 import time
 from tkinter import messagebox
 from config import TYPE_CATEGORIES
-from utils import find_config_json
+from utils import *
 from handlers import get_handler_for_type
 
 class Processor:
-    def __init__(self,source, output, selected_types, update_progress_callback):
+    def __init__(self,source, output, update_progress_callback):
         self.source = source
         self.output = output
-        self.selected_types = selected_types
         self.update_progress_callback = update_progress_callback
         self.log_path = ""
         self.paths = {}
@@ -20,6 +19,7 @@ class Processor:
         self.packs = {}
         self.versions = {}
         self.logInfo = ""
+        self.importData = [] 
 
     def process_resources(self):
         if not self.source : 
@@ -29,9 +29,9 @@ class Processor:
         self.log_path = os.path.join(self.output, "资源整理日志.txt")
 
 
-        self.logInfo = f"Cocos资源整理日志\n源文件夹: {self.source}\n输出文件夹: {self.output}\n处理的资源类型: {', '.join(self.selected_types)}\n开始时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n" + "=" * 50 + "\n\n"
+        self.logInfo = f"Cocos资源整理日志\n源文件夹: {self.source}\n输出文件夹: {self.output}\n开始时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n" + "=" * 50 + "\n\n"
 
-        config_files = find_config_json(self.source,self.selected_types)
+        config_files = find_config_json(self.source)
 
         print("已找到配置文件：",config_files)
 
@@ -53,37 +53,47 @@ class Processor:
                 self.uuids = config.get("uuids", [])
                 self.packs = config.get("packs", {})
                 self.versions = config.get("versions", {})
+                self.importData = self.versions.get("import", {})
 
                 self.logInfo += (f"》》》》》》》》》》》》开始处理: {config_path} : \n")
 
-                for idx, (res_id, res_info) in enumerate(self.paths.items(), 1):
+                for i in range(0, len(self.importData), 2):
                     try:
-                        save_path = f'{self.output}/{res_info[0]}'
-                        type_idx = res_info[1]
-                        # uuid = self.uuids[int(res_id)]
-                        res_type = self.types[type_idx]
+                        key = self.importData[i]
+                        value = self.importData[i + 1]
+                        back = False
+                        msg = "类型出错 未处理"
 
-                        if res_type not in self.selected_types:
-                            continue
-
-                        self.logInfo += f"\n>>>>开始处理：{res_id}"
-
-                        handler = get_handler_for_type(res_type)
-                        back,msg = handler(self,config, int(res_id), save_path)
+                        if type(key) == int:
+                            pathInfo = self.paths.get(str(key))
+                            if pathInfo is None:
+                                continue
+                            else:
+                                res_type = self.types[pathInfo[1]]
+                                handler = get_handler_for_type(res_type)
+                                if handler is None:
+                                    continue
+                                back,msg = handler(self,[key,value], int(key), f'{self.output}/{pathInfo[0]}')
+                        else:
+                            packField = find_field_json(self.source,value)
+                            if packField is None:
+                                continue
+                            handler = get_handler_for_type("pack")
+                            back,msg = handler(self,[key,value], 0, f'{self.output}')
 
                         if(back) : 
                             success_count += 1 
-                            self.logInfo += (f"\n   成功处理: {res_info[0]} : {res_id}\n")
+                            self.logInfo += (f"\n   成功处理: {key} : {value}\n")
                         else: 
                             error_count += 1
-                            self.logInfo += (f"\n   ***处理失败***: {res_info[0]} : {res_id}\n     {msg}\n")
+                            self.logInfo += (f"\n   ***处理失败***: {key} : {value}\n     {msg}\n")
                             
-
                         total_resources += 1
-                    except Exception:
+                    except Exception as e:
                         error_count += 1
+                        self.logInfo += (f"\n   》》异常-----: {e} \n{key} : {value}\n     {msg}\n")
 
-                    self.update_progress_callback(idx, len(self.paths), success_count, error_count)
+                    self.update_progress_callback(i, len(self.paths), success_count, error_count)
             except Exception as e:
                 self.logInfo += (f"配置文件 {config_path} 处理失败: {str(e)}\n")
                     

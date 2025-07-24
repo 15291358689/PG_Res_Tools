@@ -1,7 +1,7 @@
 import shutil
 from utils import *
 
-def handle(proc, config, res_id, save_path):
+def handle(proc,info, res_id, save_path):
 
     try:
         proc.logInfo += f'\n》atlas处理:'

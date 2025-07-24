@@ -4,7 +4,7 @@ import re
 import shutil
 from PIL import Image
 
-def find_config_json(source, selected_types):
+def find_config_json(source):
     config_files = []
     pattern = re.compile(r'^config\.[a-f0-9]+\.json$', re.IGNORECASE)
     
@@ -16,12 +16,7 @@ def find_config_json(source, selected_types):
                 # 检查文件是否是有效的 JSON 格式
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
-                        config = json.load(f)  # 解析 JSON 文件
-                        
-                        # 检查 JSON 中的 'types' 数组是否包含选中的类型
-                        types = config.get("types", [])
-                        if any(type in selected_types for type in types):
-                            config_files.append(file_path)  # 如果包含选中的类型，加入列表
+                        config_files.append(file_path)  # 如果包含选中的类型，加入列表
                 except json.JSONDecodeError:
                     print(f"警告: 文件 {file_path} 不是有效的 JSON 文件")
                 except Exception as e:

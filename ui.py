@@ -31,12 +31,6 @@ class ToolApp:
         ttk.Entry(frame, textvariable=self.output_path, width=60).grid(row=1, column=1)
         ttk.Button(frame, text="浏览", command=self.browse_output).grid(row=1, column=2)
 
-        type_frame = ttk.LabelFrame(frame, text="资源类型")
-        type_frame.grid(row=2, column=0, columnspan=3, pady=10, sticky="ew")
-
-        for i, rtype in enumerate(RESOURCE_TYPES):
-            ttk.Checkbutton(type_frame, text=rtype, variable=self.type_vars[rtype]).grid(row=i // 4, column=i % 4, sticky="w")
-
         self.progress_bar = ttk.Progressbar(frame, variable=self.progress, maximum=100)
         self.progress_bar.grid(row=3, column=0, columnspan=3, sticky="ew", pady=10)
         ttk.Label(frame, textvariable=self.progress_label).grid(row=4, column=0, columnspan=3)
@@ -64,11 +58,9 @@ class ToolApp:
         self.root.update_idletasks()
 
     def run(self):
-        selected = [rtype for rtype, var in self.type_vars.items() if var.get()]
         proc = Processor(
             self.source_path.get(),
             self.output_path.get(),
-            selected,
             self.update_progress
             )
         proc.process_resources()
