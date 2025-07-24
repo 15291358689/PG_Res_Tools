@@ -1,5 +1,7 @@
 import shutil
 from utils import *
+import traceback
+from collections import defaultdict
 
 def handle(proc, info, res_id, save_path):
     
@@ -41,19 +43,20 @@ def handle(proc, info, res_id, save_path):
             imageField = find_field_path(proc.source,hash_str)
             if(imageField is None):
                 return False,f'pack 处理失败,匹配到的图不存在 id：{imageResId}'
-            imageSaveName = f'{imageName}.{imageField.split('.')[-1]}' 
-            newSavePath = f'{save_path}/Image/{imageName}'
-            copy_field(imageField,newSavePath,imageSaveName)
+            newSavePath = f'{save_path}/Image/{imageName}.{hash_str}'
+            copy_field(imageField,newSavePath,imageName)
 
             # atlas
+            imageSaveName = f'{imageName}.{imageField.split('.')[-1]}' 
             atlasS = [d[0] for d in value]
             atlasStr = convert_atlas_array(atlasS,imageSaveName,get_image_size(imageField))
             save_file(atlasStr,newSavePath,f'{imageName}.atlas')
 
         return True, "pack 资源处理成功"
     
-    except Exception as e:
-        return False, f"****pack 处理失败****\n{e}"
+    except Exception :
+        error_info = traceback.format_exc()
+        return False, f"****pack 处理失败****\n{error_info}"
     
 
 def extract_representation(strings):

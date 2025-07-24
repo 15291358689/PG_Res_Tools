@@ -57,6 +57,7 @@ class Processor:
 
                 self.logInfo += (f"》》》》》》》》》》》》开始处理: {config_path} : \n")
 
+                # 包处理
                 for i in range(0, len(self.importData), 2):
                     try:
                         key = self.importData[i]
@@ -94,6 +95,35 @@ class Processor:
                         self.logInfo += (f"\n   》》异常-----: {e} \n{key} : {value}\n     {msg}\n")
 
                     self.update_progress_callback(i, len(self.paths), success_count, error_count)
+
+                # atlas 额外处理
+                for idx, (res_id, res_info) in enumerate(self.paths.items(), 1):
+                    try:
+                        save_path = f'{self.output}/{res_info[0]}'
+                        type_idx = res_info[1]
+                        # uuid = self.uuids[int(res_id)]
+                        res_type = self.types[type_idx]
+
+                        if not res_type == "cc.SpriteAtlas":
+                            continue
+
+                        handler = get_handler_for_type(res_type)
+                        back,msg = handler(self,config, int(res_id), save_path)
+
+                        if(back) : 
+                            success_count += 1 
+                            self.logInfo += (f"\n   成功处理: {res_info[0]} : {res_id}\n")
+                        else: 
+                            error_count += 1
+                            self.logInfo += (f"\n   ***处理失败***: {res_info[0]} : {res_id}\n     {msg}\n")
+                            
+
+                        total_resources += 1
+                    except Exception:
+                        error_count += 1
+
+                    self.update_progress_callback(idx, len(self.paths), success_count, error_count)
+
             except Exception as e:
                 self.logInfo += (f"配置文件 {config_path} 处理失败: {str(e)}\n")
                     
