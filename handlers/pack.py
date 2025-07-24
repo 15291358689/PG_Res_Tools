@@ -3,6 +3,11 @@ from utils import *
 import traceback
 from collections import defaultdict
 
+# type_handler_map = {
+#     "cc.SpriteAtlas": atlas.handle,
+#     "sp.SkeletonData": spine.handle,
+# }
+
 def handle(proc, info, res_id, save_path):
     
     try:
@@ -12,24 +17,48 @@ def handle(proc, info, res_id, save_path):
         if packField is None:
             return False,f"未找到json ：{info[0]}.{info[1]}"
 
-        jsonData = packField[5]
         imageDataS = {}
 
+        if info[0] == "07cdeb531":
 
-        for value in jsonData:
+            proc.logInfo += ""
+        
+        for value in packField[5]:
             try:
-                rect = value[0][0].get("rect")
+                data = value[0][0]
+                if "rect" in data:
+                    # 正常atlas 数据
+                    image = value[5][0]
+                    if image not in imageDataS:
+                        imageDataS[image] = []  # 初始化空列表
+                    imageDataS[image].append(value[0])
+
+                elif packField[3][data[0]][0] == "sp.SkeletonData":
+                    # 骨骼动画 特殊处理
+                    # 图
+                    imageResId = proc.uuids.index(packField[1][value[5][0]])
+                    native = proc.versions.get("native")
+                    if(not imageResId in native): 
+                        proc.logInfo += f'\npack 处理失败,没有相关资源图 id：{imageResId}'
+                        continue
+                    hash_str = native[native.index(imageResId) + 1]
+                    imageField = find_field_path(proc.source,hash_str)
+                    if(imageField is None):
+                        proc.logInfo += f'\npack 处理失败,匹配到的图不存在 id：{imageResId}'
+                        continue
+                    
+                    # 保存 文件
+                    save_path_sk = f'{proc.output}/spine/{data[3][0]}' 
+                    copy_field(imageField,save_path_sk,data[3][0])
+                    save_file(data[2],save_path_sk,data[1]+".atlas")
+                    save_file(json.dumps(data[4]),save_path_sk,data[1] + ".json")
+
+                continue
             except :
                 continue
             
-            image = value[5][0]
-            if image not in imageDataS:
-                imageDataS[image] = []  # 初始化空列表
-            imageDataS[image].append(value[0])
-
         for key,value in imageDataS.items():
-            imageNameS = [d[0].get("name") for d in value]
-            imageName = extract_representation(imageNameS)
+            
             imageNameUuid = packField[1][key]
 
 
@@ -37,20 +66,23 @@ def handle(proc, info, res_id, save_path):
             imageResId = proc.uuids.index(imageNameUuid)
             native = proc.versions.get("native")
             if(not imageResId in native): 
-                return False,f'pack 处理失败,没有相关资源图 id：{imageResId}'
-            
+                proc.logInfo += f'\npack 处理失败,没有相关资源图 id：{imageResId}'
+                continue
             hash_str = native[native.index(imageResId) + 1]
             imageField = find_field_path(proc.source,hash_str)
             if(imageField is None):
-                return False,f'pack 处理失败,匹配到的图不存在 id：{imageResId}'
-            newSavePath = f'{save_path}/Image/{imageName}.{hash_str}'
-            copy_field(imageField,newSavePath,imageName)
+                proc.logInfo += f'\npack 处理失败,匹配到的图不存在 id：{imageResId}'
+                continue
+            newSavePath = f'{save_path}/Image/{hash_str}'
+            copy_field(imageField,newSavePath,hash_str)
 
             # atlas
-            imageSaveName = f'{imageName}.{imageField.split('.')[-1]}' 
+            imageNameS = [d[0].get("name") for d in value]
+            atlasName = extract_representation(imageNameS)
+            imageSaveName = f'{hash_str}.{imageField.split('.')[-1]}' 
             atlasS = [d[0] for d in value]
             atlasStr = convert_atlas_array(atlasS,imageSaveName,get_image_size(imageField))
-            save_file(atlasStr,newSavePath,f'{imageName}.atlas')
+            save_file(atlasStr,newSavePath,f'{atlasName}.atlas')
 
         return True, "pack 资源处理成功"
     

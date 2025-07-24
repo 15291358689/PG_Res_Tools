@@ -104,10 +104,10 @@ class Processor:
                         # uuid = self.uuids[int(res_id)]
                         res_type = self.types[type_idx]
 
-                        if not res_type == "cc.SpriteAtlas":
+                        handler = get_handler_for_type(res_type)
+                        if handler is None:
                             continue
 
-                        handler = get_handler_for_type(res_type)
                         back,msg = handler(self,config, int(res_id), save_path)
 
                         if(back) : 
@@ -118,11 +118,8 @@ class Processor:
                             self.logInfo += (f"\n   ***处理失败***: {res_info[0]} : {res_id}\n     {msg}\n")
                             
 
-                        total_resources += 1
                     except Exception:
-                        error_count += 1
-
-                    self.update_progress_callback(idx, len(self.paths), success_count, error_count)
+                        break
 
             except Exception as e:
                 self.logInfo += (f"配置文件 {config_path} 处理失败: {str(e)}\n")
