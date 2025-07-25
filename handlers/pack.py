@@ -48,9 +48,10 @@ def handle(proc, info, res_id, save_path):
                         continue
                     
                     # 保存 文件
-                    save_path_sk = f'{proc.output}/spine/{data[3][0]}' 
-                    copy_field(imageField,save_path_sk,data[3][0])
-                    save_file(data[2],save_path_sk,data[1]+".atlas")
+                    imageNameNew = data[3][0].split('.')[0]
+                    save_path_sk = f'{proc.output}/spine/{imageNameNew}' 
+                    copy_field(imageField,save_path_sk,imageNameNew)
+                    save_file(data[2].lstrip("\n"),save_path_sk,data[1]+".atlas")
                     save_file(json.dumps(data[4]),save_path_sk,data[1] + ".json")
 
                 continue
