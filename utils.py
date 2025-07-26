@@ -54,7 +54,7 @@ def find_field_path(source, name):
 
     return
 
-def copy_field(src_path, dst_dir, new_name):
+def copy_field(src_path, dst_dir, new_name,addExt = True):
     """
     复制文件到新路径并重命名（保留后缀），自动创建目录，覆盖同名文件
     
@@ -70,7 +70,7 @@ def copy_field(src_path, dst_dir, new_name):
     _, ext = os.path.splitext(src_path)
     
     # 构建新文件路径（新名字 + 原后缀）
-    new_filename = f"{new_name}{ext}"
+    new_filename = f"{new_name}{ext if not addExt else ''}"
     dst_path = os.path.join(dst_dir, new_filename)
     
     # 复制文件（自动覆盖同名文件）
@@ -120,10 +120,10 @@ def convert_atlas_array(atlas_json_list, img_name, atlas_size,
         # 添加纹理信息
         atlas_str.append(f"{name}")
         atlas_str.append(f"  rotate: {False if rotated == 0 else True}")
-        atlas_str.append(f"  xy: {rect[0]}, {rect[1]}")
-        atlas_str.append(f"  size: {rect[2]},{rect[3]}")
-        atlas_str.append(f"  orig: {orig_size[0]},{orig_size[1]}")
-        atlas_str.append(f"  offset: {offset[0]},{offset[1]}")
+        atlas_str.append(f"  xy: {int(rect[0])},{int(rect[1])}")
+        atlas_str.append(f"  size: {int(rect[2])},{int(rect[3])}")
+        atlas_str.append(f"  orig: {int(orig_size[0])},{int(orig_size[1])}")
+        atlas_str.append(f"  offset: {int(offset[0])},{int(offset[1])}")
         atlas_str.append(f"  index: -1")
     
     # 返回连接后的完整图集文件

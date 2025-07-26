@@ -36,21 +36,26 @@ def handle(proc, info, res_id, save_path):
                 elif packField[3][data[0]][0] == "sp.SkeletonData":
                     # 骨骼动画 特殊处理
                     # 图
-                    imageResId = proc.uuids.index(packField[1][value[5][0]])
+                    save_path_sk = f'{proc.output}/spine/{data[3][0].split('.')[0]}' 
+                    imageResIdS = [proc.uuids.index(packField[1][i]) for i in value[5]]
                     native = proc.versions.get("native")
-                    if(not imageResId in native): 
-                        proc.logInfo += f'\npack 处理失败,没有相关资源图 id：{imageResId}'
-                        continue
-                    hash_str = native[native.index(imageResId) + 1]
-                    imageField = find_field_path(proc.source,hash_str)
-                    if(imageField is None):
-                        proc.logInfo += f'\npack 处理失败,匹配到的图不存在 id：{imageResId}'
-                        continue
+
+                    # 多图处理
+                    for imageResId in imageResIdS:
+                        native = proc.versions.get("native")
+                        if(not imageResId in native): 
+                            proc.logInfo += f'\npack 处理失败,没有相关资源图 id：{imageResId}'
+                            continue
+                        hash_str = native[native.index(imageResId) + 1]
+                        imageField = find_field_path(proc.source,hash_str)
+                        if(imageField is None):
+                            proc.logInfo += f'\npack 处理失败,匹配到的图不存在 id：{imageResId}'
+                            continue
+                        # 未实现保存
+                        copy_field(imageField,save_path_sk,imageNameNew)
+
                     
                     # 保存 文件
-                    imageNameNew = data[3][0].split('.')[0]
-                    save_path_sk = f'{proc.output}/spine/{imageNameNew}' 
-                    copy_field(imageField,save_path_sk,imageNameNew)
                     save_file(data[2].lstrip("\n"),save_path_sk,data[1]+".atlas")
                     save_file(json.dumps(data[4]),save_path_sk,data[1] + ".json")
 
