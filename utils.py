@@ -45,6 +45,8 @@ def find_field_json(source, name):
     return None  # 如果没有找到任何匹配项，返回 None
 
 def find_field_path(source, name):
+    if name == "f9a5e":
+        print()
     field_pattern = re.compile(rf'^.+\.{re.escape(name)}\..*?$', re.IGNORECASE)
 
     for root, _, files in os.walk(source):
@@ -70,7 +72,7 @@ def copy_field(src_path, dst_dir, new_name,addExt = True):
     _, ext = os.path.splitext(src_path)
     
     # 构建新文件路径（新名字 + 原后缀）
-    new_filename = f"{new_name}{ext if not addExt else ''}"
+    new_filename = f"{new_name}{ext if addExt else ''}"
     dst_path = os.path.join(dst_dir, new_filename)
     
     # 复制文件（自动覆盖同名文件）

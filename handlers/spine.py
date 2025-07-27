@@ -17,22 +17,35 @@ def handle(proc, info, res_id, save_path):
         spineData = jsonField[5][0]
         
         # 图片
-        imageResId = proc.uuids.index(jsonField[1][0])
+        # imageResId = proc.uuids.index(jsonField[1][0])
+        # native = proc.versions.get("native")
+        # if(not imageResId in native): 
+        #     return False,f'Spine 图片处理失败,没有相关资源图'
+        # hash_str = native[native.index(imageResId) + 1]
+        # imageField = find_field_path(proc.source,hash_str)
+        # if(imageField is None):
+        #     return False,f'Spine 图片处理失败,匹配到的图不存在'
+        # imageSaveName = spineData[3][0].split(".")[0]
+        
+        imageResIdS = [proc.uuids.index(jsonField[1][i]) for i in jsonField[5][0][5]]
         native = proc.versions.get("native")
-        if(not imageResId in native): 
-            return False,f'Spine 图片处理失败,没有相关资源图'
-        hash_str = native[native.index(imageResId) + 1]
-        imageField = find_field_path(proc.source,hash_str)
-        if(imageField is None):
-            return False,f'Spine 图片处理失败,匹配到的图不存在'
-        imageSaveName = spineData[3][0].split(".")[0]
+        save_path = f'{proc.output}/spine/{spineData[3][0].split(".")[0]}' 
+        
+        # 多图处理
+        for i, imageResId in enumerate(imageResIdS):
+            if(not imageResId in native): 
+                proc.logInfo += f'\npack 处理失败,没有相关资源图 id：{imageResId}'
+                continue
+            hash_str = native[native.index(imageResId) + 1]
+            imageField = find_field_path(proc.source,hash_str)
+            if(imageField is None):
+                proc.logInfo += f'\npack 处理失败,匹配到的图不存在 id：{imageResId}'
+                continue
+            # 未实现保存
+            copy_field(imageField,save_path,spineData[3][i],False)
 
         # 保存文件
-        save_path = f'{proc.output}/spine/{imageSaveName}' 
         save_file(spineData[2],save_path,spineData[1]+".atlas")
-        copy_field(imageField,save_path,imageSaveName)
-
-        # 动画json
         animJson = spineData[4]
         save_file(json.dumps(animJson),save_path,spineData[1] + ".json")
 

@@ -19,7 +19,7 @@ def handle(proc, info, res_id, save_path):
 
         imageDataS = {}
 
-        if info[0] == "07cdeb531":
+        if info[0] == "0c1b9755b":
 
             proc.logInfo += ""
         
@@ -37,12 +37,29 @@ def handle(proc, info, res_id, save_path):
                     # 骨骼动画 特殊处理
                     # 图
                     save_path_sk = f'{proc.output}/spine/{data[3][0].split('.')[0]}' 
+                    # imageResIdS = [proc.uuids.index(packField[1][i]) for i in value[5]]
+                    # native = proc.versions.get("native")
+
+                    # # 多图处理
+                    # for imageResId in imageResIdS:
+                    #     native = proc.versions.get("native")
+                    #     if(not imageResId in native): 
+                    #         proc.logInfo += f'\npack 处理失败,没有相关资源图 id：{imageResId}'
+                    #         continue
+                    #     hash_str = native[native.index(imageResId) + 1]
+                    #     imageField = find_field_path(proc.source,hash_str)
+                    #     if(imageField is None):
+                    #         proc.logInfo += f'\npack 处理失败,匹配到的图不存在 id：{imageResId}'
+                    #         continue
+                    #     # 未实现保存
+                    #     copy_field(imageField,save_path_sk,imageNameNew)
+                    spineData = value[0]
                     imageResIdS = [proc.uuids.index(packField[1][i]) for i in value[5]]
                     native = proc.versions.get("native")
-
+                    save_path = f'{proc.output}/spine/{spineData[3][0].split(".")[0]}' 
+                    
                     # 多图处理
-                    for imageResId in imageResIdS:
-                        native = proc.versions.get("native")
+                    for i, imageResId in enumerate(imageResIdS):
                         if(not imageResId in native): 
                             proc.logInfo += f'\npack 处理失败,没有相关资源图 id：{imageResId}'
                             continue
@@ -52,7 +69,7 @@ def handle(proc, info, res_id, save_path):
                             proc.logInfo += f'\npack 处理失败,匹配到的图不存在 id：{imageResId}'
                             continue
                         # 未实现保存
-                        copy_field(imageField,save_path_sk,imageNameNew)
+                        copy_field(imageField,save_path,spineData[3][i],False)
 
                     
                     # 保存 文件
@@ -84,11 +101,12 @@ def handle(proc, info, res_id, save_path):
 
             # atlas
             imageNameS = [d[0].get("name") for d in value]
-            atlasName = extract_representation(imageNameS)
+            # atlasName = extract_representation(imageNameS)
             imageSaveName = f'{hash_str}.{imageField.split('.')[-1]}' 
             atlasS = [d[0] for d in value]
             atlasStr = convert_atlas_array(atlasS,imageSaveName,get_image_size(imageField))
-            save_file(atlasStr,newSavePath,f'{atlasName}.atlas')
+
+            save_file(atlasStr,newSavePath,f'{imageNameS[0]}.atlas')
 
         return True, "pack 资源处理成功"
     
