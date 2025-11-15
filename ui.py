@@ -8,7 +8,7 @@ class ToolApp:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Cocos资源整理工具")
-        self.root.geometry("800x500")
+        # self.root.geometry("800x500")
 
         self.source_path = tk.StringVar()
         self.output_path = tk.StringVar()

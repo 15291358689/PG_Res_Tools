@@ -121,7 +121,7 @@ def convert_atlas_array(atlas_json_list, img_name, atlas_size,
         
         # 添加纹理信息
         atlas_str.append(f"{name}")
-        atlas_str.append(f"  rotate: {False if rotated == 0 else True}")
+        atlas_str.append(f"  rotate: {False if rotated == 0 else 270}")
         atlas_str.append(f"  xy: {int(rect[0])},{int(rect[1])}")
         atlas_str.append(f"  size: {int(rect[2])},{int(rect[3])}")
         atlas_str.append(f"  orig: {int(orig_size[0])},{int(orig_size[1])}")
