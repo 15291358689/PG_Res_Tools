@@ -7,7 +7,6 @@
 资源整理日志.txt
 
 # 忽略 IDE 和系统相关
-.vscode/
 .idea/
 .DS_Store
 Thumbs.db
